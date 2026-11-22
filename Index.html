@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>세연 선생님 출산 축하 카드</title>
+  <style>
+    /* =======================================================================
+       1. 디자인 토큰 및 기본 레이아웃 (따뜻한 아이보리·피치·골드 파스텔 팔레트)
+       ======================================================================= */
+    :root {
+      --bg-top: #fdfaf5;
+      --bg-mid: #f9efe4;
+      --bg-bottom: #f3e4d5;
+      --card-bg: #fffdf9;
+      --inner-bg: rgba(252, 247, 239, 0.88);
+      --ink-main: #392f27;
+      --ink-sub: #6f5f52;
+      --accent-rose: #d9826b;
+      --accent-rose-soft: #fde7df;
+      --accent-gold: #b8893c;
+      --accent-gold-soft: #f3e2c0;
+      --border-soft: rgba(184, 137, 60, 0.28);
+      --shadow-card: 0 22px 46px -14px rgba(116, 84, 50, 0.16), 0 6px 16px -4px rgba(116, 84, 50, 0.06);
+      --font-serif: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Serif KR", "Batang", Georgia, serif;
+      --font-sans: "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      font-family: var(--font-sans);
+      color: var(--ink-main);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(253, 231, 223, 0.9) 0%, transparent 48%),
+        radial-gradient(circle at 88% 85%, rgba(243, 226, 192, 0.82) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 52%, var(--bg-bottom) 100%);
+      overflow-x: hidden;
+    }
+
+    /* 전체 화면 꽃가루 캔버스 */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* 우측 상단 고정 음악 제어 버튼 */
+    .music-bar-wrap {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 40;
+    }
+
+    .music-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 253, 249, 0.94);
+      color: var(--ink-main);
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      box-shadow: 0 8px 20px -6px rgba(116, 84, 50, 0.18);
+      cursor: pointer;
+      transition: transform 0.18s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .music-toggle-btn:hover {
+      background: #fff8ee;
+      border-color: rgba(184, 137, 60, 0.48);
+    }
+
+    .music-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    .eq-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 13px;
+    }
+
+    .eq-bars span {
+      display: block;
+      width: 2.5px;
+      height: 5px;
+      border-radius: 999px;
+      background-color: var(--accent-rose);
+      transition: height 0.2s ease, opacity 0.2s ease;
+      opacity: 0.45;
+    }
+
+    .music-toggle-btn.is-playing .eq-bars span {
+      opacity: 1;
+    }
+
+    .music-toggle-btn.is-playing .eq-bars span:nth-child(1) {
+      animation: eqBounce 0.9s ease-in-out infinite;
+    }
+    .music-toggle-btn.is-playing .eq-bars span:nth-child(2) {
+      animation: eqBounce 0.9s ease-in-out 0.22s infinite;
+    }
+    .music-toggle-btn.is-playing .eq-bars span:nth-child(3) {
+      animation: eqBounce 0.9s ease-in-out 0.44s infinite;
+    }
+
+    @keyframes eqBounce {
+      0%, 100% { height: 4px; }
+      50% { height: 13px; }
+    }
+
+    /* =======================================================================
+       2. 모바일 퍼스트 축하 카드 컨테이너
+       ======================================================================= */
+    .page-shell {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 58px 16px 36px;
+      animation: cardEntrance 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .top-caption {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-gold);
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .card-outer {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 10px;
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .card-glow-top {
+      position: absolute;
+      top: -64px;
+      right: -64px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(253, 231, 223, 0.9) 0%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .card-glow-bottom {
+      position: absolute;
+      bottom: -64px;
+      left: -64px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(243, 226, 192, 0.85) 0%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 2;
+      background: var(--inner-bg);
+      border-radius: 22px;
+      border: 1px solid rgba(184, 137, 60, 0.18);
+      padding: 26px 20px 28px;
+    }
+
+    @media (min-width: 420px) {
+      .card-inner {
+        padding: 32px 26px 32px;
+      }
+    }
+
+    /* 상단 일러스트 배지 */
+    .emblem-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .emblem-circle {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #fffdf8 0%, var(--accent-rose-soft) 60%, var(--accent-gold-soft) 100%);
+      border: 1px solid rgba(184, 137, 60, 0.25);
+      box-shadow: 0 8px 18px -6px rgba(184, 137, 60, 0.22);
+      animation: gentleFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-rose-soft), #fff8ec, var(--accent-gold-soft));
+      border: 1px solid rgba(184, 137, 60, 0.24);
+      font-size: 12px;
+      font-weight: 700;
+      color: #7c4d2b;
+      margin-bottom: 10px;
+    }
+
+    .recipient-heading {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: clamp(21px, 5.8vw, 25px);
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      color: var(--ink-main);
+    }
+
+    .recipient-highlight {
+      color: #a8563f;
+      border-bottom: 2px solid rgba(217, 130, 107, 0.42);
+      padding-bottom: 1px;
+    }
+
+    .divider-ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .divider-ornament span.line {
+      width: 38px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184, 137, 60, 0.45), transparent);
+    }
+
+    .divider-ornament span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-rose);
+    }
+
+    /* =======================================================================
+       3. 편지 본문 및 서명 영역
+       ======================================================================= */
+    .letter-box {
+      background: rgba(255, 253, 249, 0.88);
+      border: 1px solid rgba(184, 137, 60, 0.22);
+      border-radius: 20px;
+      padding: 18px 16px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    @media (min-width: 420px) {
+      .letter-box {
+        padding: 22px 20px;
+      }
+    }
+
+    .letter-paragraph {
+      margin: 0 0 16px;
+      font-family: var(--font-serif);
+      font-size: clamp(14.8px, 4vw, 16px);
+      line-height: 1.9;
+      letter-spacing: -0.015em;
+      color: var(--ink-main);
+      word-break: keep-all;
+    }
+
+    .letter-paragraph:last-child {
+      margin-bottom: 0;
+    }
+
+    .signoff-area {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(184, 137, 60, 0.35);
+      text-align: right;
+    }
+
+    .signoff-note {
+      display: block;
+      font-size: 12px;
+      color: var(--ink-sub);
+      margin-bottom: 4px;
+    }
+
+    .signoff-name {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink-main);
+      letter-spacing: -0.01em;
+    }
+
+    /* =======================================================================
+       4. 하단 꽃가루 다시 뿌리기 버튼
+       ======================================================================= */
+    .footer-actions {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .replay-confetti-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #e38f76 0%, #c89646 100%);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      box-shadow: 0 12px 24px -8px rgba(196, 135, 76, 0.45);
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+
+    .replay-confetti-btn:hover {
+      filter: brightness(1.03);
+      box-shadow: 0 14px 28px -8px rgba(196, 135, 76, 0.55);
+    }
+
+    .replay-confetti-btn:active {
+      transform: scale(0.98);
+    }
+
+    .audio-hint {
+      margin-top: 9px;
+      font-size: 11.5px;
+      color: var(--ink-sub);
+    }
+  </style>
+</head>
+<body>
+  <!-- 꽃가루 오버레이 캔버스 -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- 우측 상단 배경음악 토글 버튼 -->
+  <div class="music-bar-wrap">
+    <button type="button" id="music-toggle-btn" class="music-toggle-btn" aria-pressed="false">
+      <span class="eq-bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span id="music-btn-label">🔇 음악 끄기</span>
+    </button>
+  </div>
+
+  <!-- 즉시 표시되는 모바일 출산 축하 카드 -->
+  <main class="page-shell" id="congrats-card">
+    <div class="top-caption">소중한 새 생명의 탄생을 진심으로 축복합니다</div>
+
+    <article class="card-outer">
+      <div class="card-glow-top"></div>
+      <div class="card-glow-bottom"></div>
+
+      <div class="card-inner">
+        <!-- 아기 발바닥 & 별빛 SVG 일러스트 -->
+        <div class="emblem-wrap">
+          <div class="emblem-circle">
+            <svg width="46" height="46" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="아기 축복 일러스트">
+              <path d="M50 10L51.3 13.7L55 15L51.3 16.3L50 20L48.7 16.3L45 15L48.7 13.7L50 10Z" fill="#C99642"/>
+              <path d="M14 14L14.9 16.6L17.5 17.5L14.9 18.4L14 21L13.1 18.4L10.5 17.5L13.1 16.6L14 14Z" fill="#DF8A72"/>
+              <g transform="rotate(-14 24 38)">
+                <ellipse cx="24" cy="40" rx="5.8" ry="8.5" fill="#ECAA97"/>
+                <circle cx="19" cy="29" r="2.1" fill="#ECAA97"/>
+                <circle cx="22.8" cy="27.5" r="1.7" fill="#ECAA97"/>
+                <circle cx="26.2" cy="28.2" r="1.5" fill="#ECAA97"/>
+                <circle cx="29" cy="30" r="1.3" fill="#ECAA97"/>
+              </g>
+              <g transform="rotate(14 40 40)">
+                <ellipse cx="40" cy="42" rx="5.8" ry="8.5" fill="#E1947E"/>
+                <circle cx="45" cy="31" r="2.1" fill="#E1947E"/>
+                <circle cx="41.2" cy="29.5" r="1.7" fill="#E1947E"/>
+                <circle cx="37.8" cy="30.2" r="1.5" fill="#E1947E"/>
+                <circle cx="35" cy="32" r="1.3" fill="#E1947E"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 수신자 헤더 -->
+        <header class="card-header">
+          <div class="pill-badge">
+            <span>👶</span>
+            <span>득남을 진심으로 축하합니다</span>
+            <span>✨</span>
+          </div>
+          <h1 class="recipient-heading">
+            <span class="recipient-highlight">세연 선생님</span>께 전하는 축하 편지
+          </h1>
+          <div class="divider-ornament" aria-hidden="true">
+            <span class="line"></span>
+            <span class="dot"></span>
+            <span class="line"></span>
+          </div>
+        </header>
+
+        <!-- 편지 본문 -->
+        <section class="letter-box" aria-label="출산 축하 메시지">
+          <p class="letter-paragraph">
+            세연 선생님, 예쁜 아드님 출산한 것 진심으로 축하해요! 그동안 몸도 무겁고 신경 쓸 일도 많았을 텐데, 열 달 동안 잘 견디고 무사히 출산하느라 정말 고생 많았어요.
+          </p>
+          <p class="letter-paragraph">
+            선생님이랑 아기 둘 다 건강하다는 소식을 들으니 병원 식구들 모두 자기 일처럼 반가워하고 기뻐하네요. 이제 막 세상에 나온 아기와 눈 맞추며 행복한 시간 보내고 있을 모습을 생각하니 제 마음까지 덩달아 따뜻해집니다.
+          </p>
+          <p class="letter-paragraph">
+            당분간은 병원 일이나 다른 걱정은 잠시 내려두고, 오롯이 선생님 몸조리하고 회복하는 데만 마음을 썼으면 좋겠어요. 잠도 부족하고 낯선 순간들이 이어지겠지만, 조리원 있는 동안 조금이라도 기분 전환이 되고 작은 힘이 되었으면 해서 정성을 담아 선물 보냅니다.
+          </p>
+          <p class="letter-paragraph">
+            맛있는 것 많이 먹고 충분히 쉬면서 건강 잘 챙기세요. 몸 잘 추스르고, 나중에 밝고 건강한 모습으로 다시 반갑게 만납시다. 다시 한번 진심으로 축하해요!
+          </p>
+        </section>
+
+        <!-- 발신자 서명 -->
+        <div class="signoff-area">
+          <span class="signoff-note">따뜻한 마음을 담아 축하를 전하며</span>
+          <p class="signoff-name">이달곤 부장 드림</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- 꽃가루 다시 뿌리기 버튼 -->
+    <footer class="footer-actions">
+      <button type="button" id="replay-confetti-btn" class="replay-confetti-btn">
+        🎉 축하 꽃가루 다시 뿌리기
+      </button>
+      <div class="audio-hint" id="audio-status-hint">
+        화면을 터치하면 피아노·현악 축복 음악이 이어집니다.
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* =====================================================================
+         1. 길고 감동적인 16마디(64박 / 약 58초 루프) 피아노 + 현악 앙상블 BGM
+            - Lookahead 스케줄러(100ms 간격, 0.28s 선예약)로 음 끊김 방지
+            - D Major / G Major 서정적 진행:
+              [1~4마디]  부드러운 도입 (D - A - Bm - G)
+              [5~8마디]  따뜻한 선율 전개 (D - F#m - G - A)
+              [9~12마디] 희망과 감격의 클라이맥스 (G - A - Bm - F#m)
+              [13~16마디] 벅차오르는 고조와 포근한 여운 (G - A - D - D)
+         ===================================================================== */
+      class EmotionalPianoStringBGM {
+        constructor() {
+          this.ctx = null;
+          this.masterGain = null;
+          this.reverbBus = null;
+          this.isPlaying = false;
+          this.userMuted = false;
+          this.schedulerId = null;
+
+          // 4/4박자 기준 1박(Quarter Note) = 0.92초 (약 65 BPM, 서정적이고 웅장한 호흡)
+          // 총 16마디 * 4박 = 64박 = 약 58.88초 한 사이클, 무한 반복
+          this.beatSeconds = 0.92;
+          this.totalBeats = 64;
+          this.currentBeat = 0;
+          this.nextNoteTime = 0;
+          this.lookaheadMs = 100;
+          this.scheduleAheadSec = 0.28;
+
+          // D Major / G Major 주파수 맵
+          this.N = {
+            D2: 73.42,  E2: 82.41,  Fs2: 92.50, G2: 98.00,  A2: 110.00, B2: 123.47,
+            D3: 146.83, E3: 164.81, Fs3: 185.00, G3: 196.00, A3: 220.00, B3: 246.94, Cs4: 277.18,
+            D4: 293.66, E4: 329.63, Fs4: 369.99, G4: 392.00, A4: 440.00, B4: 493.88, Cs5: 554.37,
+            D5: 587.33, E5: 659.25, Fs5: 739.99, G5: 783.99, A5: 880.00, B5: 987.77
+          };
+
+          const N = this.N;
+
+          // 16마디 화성 진행 (각 마디 4박): [베이스음, 현악 패드 화음, 피아노 아르페지오 패턴(박당 2음 = 8분음표)]
+          this.bars = [
+            // 1. D maj
+            { bass: N.D2, pad: [N.D4, N.Fs4, N.A4],  arp: [N.D3, N.A3, N.D4, N.Fs4, N.A4, N.Fs4, N.D4, N.A3] },
+            // 2. A maj
+            { bass: N.A2, pad: [N.Cs4, N.E4, N.A4],  arp: [N.A2, N.E3, N.A3, N.Cs4, N.E4, N.Cs4, N.A3, N.E3] },
+            // 3. B min
+            { bass: N.B2, pad: [N.D4, N.Fs4, N.B4],  arp: [N.B2, N.Fs3, N.B3, N.D4, N.Fs4, N.D4, N.B3, N.Fs3] },
+            // 4. G maj
+            { bass: N.G2, pad: [N.D4, N.G4, N.B4],  arp: [N.G2, N.D3, N.G3, N.B3, N.D4, N.B3, N.G3, N.D3] },
+
+            // 5. D maj
+            { bass: N.D2, pad: [N.Fs4, N.A4, N.D5],  arp: [N.D3, N.A3, N.D4, N.Fs4, N.A4, N.D5, N.A4, N.Fs4] },
+            // 6. F# min
+            { bass: N.Fs2, pad: [N.Cs4, N.Fs4, N.A4], arp: [N.Fs2, N.Cs3, N.Fs3, N.A3, N.Cs4, N.A3, N.Fs3, N.Cs3] },
+            // 7. G maj
+            { bass: N.G2, pad: [N.B4, N.D5, N.G5],   arp: [N.G2, N.D3, N.G3, N.B3, N.D4, N.G4, N.D4, N.B3] },
+            // 8. A maj
+            { bass: N.A2, pad: [N.Cs4, N.E4, N.A4],  arp: [N.A2, N.E3, N.A3, N.Cs4, N.E4, N.A4, N.E4, N.Cs4] },
+
+            // 9. G maj (클라이맥스 진입)
+            { bass: N.G2, pad: [N.D4, N.G4, N.B4, N.D5], arp: [N.G2, N.D3, N.G3, N.B3, N.D4, N.G4, N.B4, N.D5] },
+            // 10. A maj
+            { bass: N.A2, pad: [N.E4, N.A4, N.Cs5],      arp: [N.A2, N.E3, N.A3, N.Cs4, N.E4, N.A4, N.Cs5, N.E5] },
+            // 11. B min
+            { bass: N.B2, pad: [N.D4, N.Fs4, N.B4, N.D5], arp: [N.B2, N.Fs3, N.B3, N.D4, N.Fs4, N.B4, N.D5, N.Fs5] },
+            // 12. F# min
+            { bass: N.Fs2, pad: [N.Cs4, N.Fs4, N.A4],     arp: [N.Fs2, N.Cs3, N.Fs3, N.A3, N.Cs4, N.Fs4, N.A4, N.Cs5] },
+
+            // 13. G maj (가장 벅차오르는 고조)
+            { bass: N.G2, pad: [N.D4, N.G4, N.B4, N.D5], arp: [N.G2, N.D3, N.G3, N.B3, N.D4, N.G4, N.B4, N.D5] },
+            // 14. A maj
+            { bass: N.A2, pad: [N.E4, N.A4, N.Cs5, N.E5],arp: [N.A2, N.E3, N.A3, N.Cs4, N.E4, N.A4, N.Cs5, N.A4] },
+            // 15. D maj (따뜻한 해결)
+            { bass: N.D2, pad: [N.D4, N.Fs4, N.A4, N.D5], arp: [N.D2, N.A2, N.D3, N.Fs3, N.A3, N.D4, N.Fs4, N.A4] },
+            // 16. D maj (감격스러운 여운과 마무리)
+            { bass: N.D2, pad: [N.D4, N.Fs4, N.A4],      arp: [N.D2, N.A2, N.D3, N.Fs3, N.A3, N.Fs3, N.D3, N.A2] }
+          ];
+
+          // 64박(16마디) 서정적 멜로디 라인: { beat: 시작박(0~63.5), freq, dur: 박단위길이, vel }
+          this.melodyNotes = [
+            // 1~4마디: 잔잔하고 따뜻한 시작
+            { beat: 0.0,  freq: N.Fs5, dur: 2.0, vel: 0.24 },
+            { beat: 2.0,  freq: N.E5,  dur: 1.0, vel: 0.22 },
+            { beat: 3.0,  freq: N.D5,  dur: 1.0, vel: 0.22 },
+
+            { beat: 4.0,  freq: N.E5,  dur: 2.0, vel: 0.24 },
+            { beat: 6.0,  freq: N.Cs5, dur: 1.0, vel: 0.21 },
+            { beat: 7.0,  freq: N.A4,  dur: 1.0, vel: 0.21 },
+
+            { beat: 8.0,  freq: N.D5,  dur: 2.0, vel: 0.25 },
+            { beat: 10.0, freq: N.B4,  dur: 1.0, vel: 0.22 },
+            { beat: 11.0, freq: N.D5,  dur: 1.0, vel: 0.22 },
+
+            { beat: 12.0, freq: N.B4,  dur: 2.5, vel: 0.24 },
+            { beat: 14.5, freq: N.A4,  dur: 0.5, vel: 0.20 },
+            { beat: 15.0, freq: N.G4,  dur: 1.0, vel: 0.21 },
+
+            // 5~8마디: 한층 깊어지는 서정선율
+            { beat: 16.0, freq: N.A4,  dur: 1.5, vel: 0.24 },
+            { beat: 17.5, freq: N.D5,  dur: 0.5, vel: 0.22 },
+            { beat: 18.0, freq: N.Fs5, dur: 1.5, vel: 0.26 },
+            { beat: 19.5, freq: N.E5,  dur: 0.5, vel: 0.23 },
+
+            { beat: 20.0, freq: N.Cs5, dur: 2.0, vel: 0.25 },
+            { beat: 22.0, freq: N.A4,  dur: 1.0, vel: 0.22 },
+            { beat: 23.0, freq: N.Cs5, dur: 1.0, vel: 0.23 },
+
+            { beat: 24.0, freq: N.D5,  dur: 1.5, vel: 0.26 },
+            { beat: 25.5, freq: N.B4,  dur: 0.5, vel: 0.23 },
+            { beat: 26.0, freq: N.G5,  dur: 1.5, vel: 0.28 },
+            { beat: 27.5, freq: N.Fs5, dur: 0.5, vel: 0.25 },
+
+            { beat: 28.0, freq: N.E5,  dur: 3.0, vel: 0.27 },
+            { beat: 31.0, freq: N.Cs5, dur: 1.0, vel: 0.23 },
+
+            // 9~12마디: 벅차오르는 희망의 선율
+            { beat: 32.0, freq: N.D5,  dur: 1.5, vel: 0.28 },
+            { beat: 33.5, freq: N.G5,  dur: 0.5, vel: 0.27 },
+            { beat: 34.0, freq: N.B5,  dur: 2.0, vel: 0.31 },
+
+            { beat: 36.0, freq: N.A5,  dur: 2.0, vel: 0.30 },
+            { beat: 38.0, freq: N.G5,  dur: 1.0, vel: 0.27 },
+            { beat: 39.0, freq: N.Fs5, dur: 1.0, vel: 0.26 },
+
+            { beat: 40.0, freq: N.Fs5, dur: 2.0, vel: 0.29 },
+            { beat: 42.0, freq: N.D5,  dur: 1.0, vel: 0.25 },
+            { beat: 43.0, freq: N.B4,  dur: 1.0, vel: 0.24 },
+
+            { beat: 44.0, freq: N.Cs5, dur: 2.5, vel: 0.27 },
+            { beat: 46.5, freq: N.D5,  dur: 0.5, vel: 0.25 },
+            { beat: 47.0, freq: N.E5,  dur: 1.0, vel: 0.26 },
+
+            // 13~16마디: 감격스러운 클라이맥스와 따뜻한 여운
+            { beat: 48.0, freq: N.G5,  dur: 1.5, vel: 0.31 },
+            { beat: 49.5, freq: N.A5,  dur: 0.5, vel: 0.30 },
+            { beat: 50.0, freq: N.B5,  dur: 1.5, vel: 0.33 },
+            { beat: 51.5, freq: N.A5,  dur: 0.5, vel: 0.29 },
+
+            { beat: 52.0, freq: N.A5,  dur: 2.0, vel: 0.31 },
+            { beat: 54.0, freq: N.G5,  dur: 1.0, vel: 0.28 },
+            { beat: 55.0, freq: N.Fs5, dur: 1.0, vel: 0.27 },
+
+            { beat: 56.0, freq: N.Fs5, dur: 2.0, vel: 0.28 },
+            { beat: 58.0, freq: N.E5,  dur: 1.0, vel: 0.25 },
+            { beat: 59.0, freq: N.D5,  dur: 1.0, vel: 0.24 },
+
+            { beat: 60.0, freq: N.D5,  dur: 4.0, vel: 0.26 }
+          ];
+        }
+
+        buildImpulse(ctx) {
+          const sampleRate = ctx.sampleRate;
+          const length = Math.floor(sampleRate * 2.4);
+          const buffer = ctx.createBuffer(2, length, sampleRate);
+          for (let ch = 0; ch < 2; ch++) {
+            const data = buffer.getChannelData(ch);
+            for (let i = 0; i < length; i++) {
+              const decay = Math.pow(1 - i / length, 2.3);
+              data[i] = (Math.random() * 2 - 1) * decay;
+            }
+          }
+          return buffer;
+        }
+
+        ensureContext() {
+          if (!this.ctx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+
+            this.ctx = new AudioContextClass();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(0.36, this.ctx.currentTime);
+
+            const convolver = this.ctx.createConvolver();
+            convolver.buffer = this.buildImpulse(this.ctx);
+
+            this.reverbBus = this.ctx.createGain();
+            this.reverbBus.gain.setValueAtTime(0.34, this.ctx.currentTime);
+
+            convolver.connect(this.reverbBus);
+            this.reverbBus.connect(this.masterGain);
+            this.masterGain.connect(this.ctx.destination);
+            this._convolver = convolver;
+          }
+          return this.ctx;
+        }
+
+        // 피아노 음(베이스 또는 아르페지오) 예약
+        schedulePiano(freq, startTime, durationSec, gainPeak, isBass) {
+          if (!this.ctx || !this.masterGain) return;
+
+          const oscFund = this.ctx.createOscillator();
+          const oscHarm = this.ctx.createOscillator();
+          const filter = this.ctx.createBiquadFilter();
+          const harmGain = this.ctx.createGain();
+          const env = this.ctx.createGain();
+
+          oscFund.type = "triangle";
+          oscHarm.type = "sine";
+          oscFund.frequency.setValueAtTime(freq, startTime);
+          oscHarm.frequency.setValueAtTime(freq * 2, startTime);
+
+          harmGain.gain.setValueAtTime(isBass ? 0.08 : 0.22, startTime);
+
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(isBass ? 460 : 2100, startTime);
+          filter.frequency.exponentialRampToValueAtTime(isBass ? 180 : 680, startTime + durationSec);
+
+          const endTime = startTime + durationSec + 0.08;
+          env.gain.setValueAtTime(0.0001, startTime);
+          env.gain.linearRampToValueAtTime(gainPeak, startTime + 0.025);
+          env.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+          oscFund.connect(filter);
+          oscHarm.connect(harmGain);
+          harmGain.connect(filter);
+          filter.connect(env);
+
+          env.connect(this.masterGain);
+          if (this._convolver) {
+            env.connect(this._convolver);
+          }
+
+          oscFund.start(startTime);
+          oscHarm.start(startTime);
+          oscFund.stop(endTime + 0.02);
+          oscHarm.stop(endTime + 0.02);
+        }
+
+        // 따뜻한 현악 앙상블 패드 예약 (한 마디 길이 동안 부드럽게 스며듦)
+        scheduleStringPad(freqs, startTime, barDurationSec) {
+          if (!this.ctx || !this.masterGain) return;
+
+          freqs.forEach((freq) => {
+            [-5, 5].forEach((detune) => {
+              const osc = this.ctx.createOscillator();
+              const filter = this.ctx.createBiquadFilter();
+              const env = this.ctx.createGain();
+
+              osc.type = "sawtooth";
+              osc.frequency.setValueAtTime(freq, startTime);
+              osc.detune.setValueAtTime(detune, startTime);
+
+              filter.type = "lowpass";
+              filter.frequency.setValueAtTime(920, startTime);
+
+              const attackEnd = startTime + Math.min(0.85, barDurationSec * 0.25);
+              const releaseStart = startTime + barDurationSec * 0.72;
+              const endTime = startTime + barDurationSec + 0.55;
+
+              env.gain.setValueAtTime(0.0001, startTime);
+              env.gain.linearRampToValueAtTime(0.026, attackEnd);
+              env.gain.setValueAtTime(0.025, releaseStart);
+              env.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+              osc.connect(filter);
+              filter.connect(env);
+
+              env.connect(this.masterGain);
+              if (this._convolver) {
+                env.connect(this._convolver);
+              }
+
+              osc.start(startTime);
+              osc.stop(endTime + 0.03);
+            });
+          });
+        }
+
+        // 서정적 리드 멜로디 예약
+        scheduleLead(freq, startTime, durationSec, vel) {
+          if (!this.ctx || !this.masterGain) return;
+
+          const oscMain = this.ctx.createOscillator();
+          const oscWarm = this.ctx.createOscillator();
+          const filter = this.ctx.createBiquadFilter();
+          const warmGain = this.ctx.createGain();
+          const env = this.ctx.createGain();
+
+          oscMain.type = "sine";
+          oscWarm.type = "triangle";
+          oscMain.frequency.setValueAtTime(freq, startTime);
+          oscWarm.frequency.setValueAtTime(freq, startTime);
+          oscWarm.detune.setValueAtTime(3.5, startTime);
+
+          warmGain.gain.setValueAtTime(0.32, startTime);
+
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(2350, startTime);
+
+          const totalDur = durationSec + 0.55;
+          const endTime = startTime + totalDur;
+
+          env.gain.setValueAtTime(0.0001, startTime);
+          env.gain.linearRampToValueAtTime(vel, startTime + 0.05);
+          env.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+          oscMain.connect(filter);
+          oscWarm.connect(warmGain);
+          warmGain.connect(filter);
+          filter.connect(env);
+
+          env.connect(this.masterGain);
+          if (this._convolver) {
+            env.connect(this._convolver);
+          }
+
+          oscMain.start(startTime);
+          oscWarm.start(startTime);
+          oscMain.stop(endTime + 0.03);
+          oscWarm.stop(endTime + 0.03);
+        }
+
+        // 현재 박(beat)에 해당하는 반주 및 멜로디 스케줄링
+        scheduleBeat(beatNumber, time) {
+          const wrappedBeat = beatNumber % this.totalBeats;
+          const barIndex = Math.floor(wrappedBeat / 4);
+          const beatInBar = wrappedBeat % 4;
+          const bar = this.bars[barIndex];
+          const barDur = this.beatSeconds * 4;
+
+          // 매 마디 첫 박에 베이스 + 현악 패드
+          if (beatInBar === 0) {
+            this.schedulePiano(bar.bass, time, barDur * 0.95, 0.25, true);
+            this.scheduleStringPad(bar.pad, time, barDur);
+          }
+
+          // 한 박당 2개의 아르페지오 음(8분음표 간격)
+          const halfBeat = this.beatSeconds * 0.5;
+          const idxA = beatInBar * 2;
+          const idxB = beatInBar * 2 + 1;
+          this.schedulePiano(bar.arp[idxA], time, halfBeat * 2.4, beatInBar === 0 ? 0.19 : 0.14, false);
+          this.schedulePiano(bar.arp[idxB], time + halfBeat, halfBeat * 2.4, 0.13, false);
+
+          // 해당 박에 시작하는 리드 멜로디 음표 모두 예약
+          for (let i = 0; i < this.melodyNotes.length; i++) {
+            const m = this.melodyNotes[i];
+            if (Math.abs(m.beat - wrappedBeat) < 0.01) {
+              this.scheduleLead(m.freq, time, m.dur * this.beatSeconds, m.vel);
+            }
+          }
+        }
+
+        runScheduler() {
+          if (!this.isPlaying || !this.ctx) return;
+
+          while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadSec) {
+            this.scheduleBeat(this.currentBeat, this.nextNoteTime);
+            this.nextNoteTime += this.beatSeconds;
+            this.currentBeat = (this.currentBeat + 1) % this.totalBeats;
+          }
+        }
+
+        startLoopTimers() {
+          if (this.schedulerId !== null) {
+            clearInterval(this.schedulerId);
+            this.schedulerId = null;
+          }
+          this.nextNoteTime = this.ctx.currentTime + 0.06;
+          this.runScheduler();
+          this.schedulerId = setInterval(() => this.runScheduler(), this.lookaheadMs);
+        }
+
+        stopLoopTimers() {
+          if (this.schedulerId !== null) {
+            clearInterval(this.schedulerId);
+            this.schedulerId = null;
+          }
+        }
+
+        async start(fromUserGesture = false) {
+          if (fromUserGesture) {
+            this.userMuted = false;
+          }
+          if (this.userMuted) return false;
+
+          const ctx = this.ensureContext();
+          if (!ctx) return false;
+
+          if (ctx.state === "suspended") {
+            try {
+              await ctx.resume();
+            } catch (_) {
+              return false;
+            }
+          }
+
+          if (ctx.state !== "running") {
+            return false;
+          }
+
+          // 이미 재생 중이면 타이머 중복 생성 방지
+          if (this.isPlaying && this.schedulerId !== null) {
+            updateAudioUI(true);
+            return true;
+          }
+
+          this.isPlaying = true;
+          this.startLoopTimers();
+          updateAudioUI(true);
+          return true;
+        }
+
+        stop(byUser = false) {
+          if (byUser) {
+            this.userMuted = true;
+          }
+          this.isPlaying = false;
+          this.stopLoopTimers();
+          updateAudioUI(false);
+        }
+
+        async toggle() {
+          if (this.isPlaying) {
+            this.stop(true);
+            return false;
+          }
+          return await this.start(true);
+        }
+      }
+
+      const bgmPlayer = new EmotionalPianoStringBGM();
+      const musicToggleBtn = document.getElementById("music-toggle-btn");
+      const musicBtnLabel = document.getElementById("music-btn-label");
+      const audioStatusHint = document.getElementById("audio-status-hint");
+
+      function updateAudioUI(playing) {
+        if (playing) {
+          musicToggleBtn.classList.add("is-playing");
+          musicToggleBtn.setAttribute("aria-pressed", "true");
+          musicBtnLabel.textContent = "🎵 음악 재생 중";
+          audioStatusHint.textContent = "피아노·현악 축복 음악이 흐르고 있습니다. (우측 상단 버튼으로 제어 가능)";
+        } else {
+          musicToggleBtn.classList.remove("is-playing");
+          musicToggleBtn.setAttribute("aria-pressed", "false");
+          musicBtnLabel.textContent = "🔇 음악 끄기";
+          audioStatusHint.textContent = bgmPlayer.userMuted
+            ? "음악이 꺼져 있습니다. 상단 버튼이나 화면을 눌러 다시 켤 수 있어요."
+            : "화면을 터치하면 피아노·현악 축복 음악이 재생됩니다.";
+        }
+      }
+
+      musicToggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        bgmPlayer.toggle();
+      });
+
+      // 브라우저 자동재생 정책으로 초기 suspended 상태여도 첫 터치/클릭/키입력 시 즉시 재생 시작
+      const unlockOnGesture = () => {
+        if (!bgmPlayer.isPlaying && !bgmPlayer.userMuted) {
+          bgmPlayer.start(false);
+        }
+      };
+      document.addEventListener("pointerdown", unlockOnGesture, { passive: true });
+      document.addEventListener("touchstart", unlockOnGesture, { passive: true });
+      document.addEventListener("keydown", unlockOnGesture, { passive: true });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && bgmPlayer.isPlaying) {
+          bgmPlayer.stopLoopTimers();
+          bgmPlayer.isPlaying = false;
+          updateAudioUI(false);
+        } else if (!document.hidden && !bgmPlayer.userMuted && !bgmPlayer.isPlaying) {
+          bgmPlayer.start(false);
+        }
+      });
+
+      /* =====================================================================
+         2. 파스텔 꽃가루(Confetti) 애니메이션
+         ===================================================================== */
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      let confettiList = [];
+      let rafId = null;
+
+      const PALETTE = [
+        "#F4B8A8",
+        "#F5D487",
+        "#FADCD9",
+        "#E5B869",
+        "#D8E5EE",
+        "#FFF3D6"
+      ];
+
+      function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+
+      class ConfettiPiece {
+        constructor(fromReplay = false) {
+          this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+          this.isCircle = Math.random() > 0.55;
+          this.size = Math.random() * 6.5 + 5;
+          this.angle = Math.random() * 360;
+          this.spin = (Math.random() - 0.5) * 6;
+          this.swayPhase = Math.random() * Math.PI * 2;
+          this.swaySpeed = Math.random() * 0.06 + 0.025;
+          this.alpha = 1;
+
+          const viewW = window.innerWidth;
+          const viewH = window.innerHeight;
+
+          if (fromReplay) {
+            this.x = viewW * (0.2 + Math.random() * 0.6);
+            this.y = viewH * 0.68;
+            this.vx = (Math.random() - 0.5) * 8.5;
+            this.vy = -(Math.random() * 10 + 5.5);
+            this.gravity = 0.2;
+          } else {
+            this.x = Math.random() * viewW;
+            this.y = Math.random() * -viewH * 0.5 - 16;
+            this.vx = (Math.random() - 0.5) * 1.5;
+            this.vy = Math.random() * 2.0 + 1.3;
+            this.gravity = 0.017;
+          }
+        }
+
+        update() {
+          this.swayPhase += this.swaySpeed;
+          this.x += this.vx + Math.sin(this.swayPhase) * 0.7;
+          this.vy += this.gravity;
+          this.y += this.vy;
+          this.angle += this.spin;
+
+          if (this.y > window.innerHeight * 0.84) {
+            this.alpha -= 0.022;
+          }
+        }
+
+        draw() {
+          if (this.alpha <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, this.alpha);
+          ctx.translate(this.x, this.y);
+          ctx.rotate((this.angle * Math.PI) / 180);
+          ctx.fillStyle = this.color;
+
+          if (this.isCircle) {
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size * 0.45, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-this.size / 2, -this.size / 3, this.size, this.size * 0.58);
+          }
+          ctx.restore();
+        }
+      }
+
+      function stepConfetti() {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        confettiList = confettiList.filter((p) => p.alpha > 0 && p.y < window.innerHeight + 40);
+
+        for (let i = 0; i < confettiList.length; i++) {
+          confettiList[i].update();
+          confettiList[i].draw();
+        }
+
+        if (confettiList.length > 0) {
+          rafId = requestAnimationFrame(stepConfetti);
+        } else {
+          rafId = null;
+        }
+      }
+
+      function burstConfetti(count, fromReplay) {
+        for (let i = 0; i < count; i++) {
+          confettiList.push(new ConfettiPiece(fromReplay));
+        }
+        if (!rafId) {
+          rafId = requestAnimationFrame(stepConfetti);
+        }
+      }
+
+      document.getElementById("replay-confetti-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        burstConfetti(80, true);
+        if (!bgmPlayer.isPlaying && !bgmPlayer.userMuted) {
+          bgmPlayer.start(false);
+        }
+      });
+
+      // 페이지 로드 시 팝업/덮개 없이 바로 꽃가루 뿌리기 및 음악 자동 재생 시도
+      window.addEventListener("DOMContentLoaded", () => {
+        burstConfetti(90, false);
+        bgmPlayer.start(false);
+      });
+    })();
+  </script>
+</body>
+</html>
